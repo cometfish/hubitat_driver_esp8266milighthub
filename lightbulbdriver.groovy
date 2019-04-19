@@ -7,18 +7,19 @@
 metadata {
     definition(name: "LimitlessLED Light", namespace: "community", author: "cometfish") {
         capability "Actuator"
+		capability "Bulb"
         capability "Switch"
 		capability "SwitchLevel"
         capability "Light"
 		
 		attribute "nightMode", "boolean"
 		attribute "level", "number"
-		attribute "colourTemperature", "number" 
+		attribute "colorTemperature", "number" 
 		
 		
 		
 		command "nightMode"
-		command "setColourTemperature", [[name: "ColourTemperature *", type: "NUMBER", description: "0 for Cool white, up to 100 for Warm white", constraints:[]]]
+		command "setColorTemperature", [[name: "ColorTemperature *", type: "NUMBER", description: "3000 for Warm white, up to 6500 for Cool white", constraints:[]]]
     }
 }
 
@@ -151,9 +152,16 @@ def setLevel(level) {
     }
 }
 
-def setColourTemperature(colourTemperature) {
-    if (logEnable) log.debug "Sending colour temperature request"
+def setColorTemperature(colorTemperature) {
+    if (logEnable) log.debug "Sending color temperature request"
 
+    //limitlessled bulbs range from 3000-6500K, 100 to 0
+	if (colorTemperature<3000)
+        colorTemperature = 3000
+    else if (colorTemperature>6500)
+	    colorTemperature = 6500
+    lltemp = 100 - Math.round(((colorTemperature - 3000)/(6500-3000))* 100)
+	if (logEnable) log.debug lltemp
     try {
 		def url = "http://" + settings.ipAddress + "/gateways/" + settings.hubID + "/cct/" + settings.lightID
 		if (logEnable) log.debug url
@@ -161,18 +169,18 @@ def setColourTemperature(colourTemperature) {
             uri: url,
 			contentType: "application/json",
 			requestContentType: "application/json",
-            body : ["temperature": colourTemperature]
+            body : ["temperature": lltemp]
         ]
     
         httpPost(postParams) { resp ->
 		    if (resp.success) {
-                sendEvent(name: "colourTemperature", value: colourTemperature, isStateChange: true)
+                sendEvent(name: "colorTemperature", value: colorTemperature, isStateChange: true)
 				
             }
             if (logEnable)
                 if (resp.data) log.debug "${resp.data}"
         }
     } catch (Exception e) {
-        log.warn "Call to colourTemperature failed: ${e.message} ${colourTemperature} "
+        log.warn "Call to colorTemperature failed: ${e.message} ${colorTemperature} "
     }
 }
