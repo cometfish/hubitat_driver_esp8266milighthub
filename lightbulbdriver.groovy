@@ -13,12 +13,12 @@ metadata {
 		
 		attribute "nightMode", "boolean"
 		attribute "level", "number"
-		attribute "temperature", "number" 
+		attribute "colourTemperature", "number" 
 		
 		
 		
 		command "nightMode"
-		command "setTemperature", [[name: "Temperature *", type: "NUMBER", description: "0 for Cool white, up to 100 for Warm white", constraints:[]]]
+		command "setColourTemperature", [[name: "ColourTemperature *", type: "NUMBER", description: "0 for Cool white, up to 100 for Warm white", constraints:[]]]
     }
 }
 
@@ -151,8 +151,8 @@ def setLevel(level) {
     }
 }
 
-def setTemperature(temperature) {
-    if (logEnable) log.debug "Sending temperature request"
+def setColourTemperature(colourTemperature) {
+    if (logEnable) log.debug "Sending colour temperature request"
 
     try {
 		def url = "http://" + settings.ipAddress + "/gateways/" + settings.hubID + "/cct/" + settings.lightID
@@ -161,18 +161,18 @@ def setTemperature(temperature) {
             uri: url,
 			contentType: "application/json",
 			requestContentType: "application/json",
-            body : ["temperature": temperature]
+            body : ["temperature": colourTemperature]
         ]
     
         httpPost(postParams) { resp ->
 		    if (resp.success) {
-                sendEvent(name: "temperature", value: temperature, isStateChange: true)
+                sendEvent(name: "colourTemperature", value: colourTemperature, isStateChange: true)
 				
             }
             if (logEnable)
                 if (resp.data) log.debug "${resp.data}"
         }
     } catch (Exception e) {
-        log.warn "Call to temperature failed: ${e.message} ${temperature} "
+        log.warn "Call to colourTemperature failed: ${e.message} ${colourTemperature} "
     }
 }
