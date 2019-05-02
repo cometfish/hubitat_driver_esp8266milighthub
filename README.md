@@ -5,7 +5,7 @@ Add MiLight/LimitlessLED bulbs to Hubitat (requires the [ESP8266 MiLight Hub](ht
 2. Add `lightbulbdriver.groovy` to your Hubitat as a new Driver (under `Drivers Code`)
 3. Add a new device for each bulb group to your Hubitat, set device Type to your User driver of 'MiLight-LimitlessLED Light'
 4. Configure the Hubitat bulb device with:
-	i. the IP address of the hub
-	ii. your hex Hub address (see the hub documentation for how to discover/set this)
-	iii. your light type (`cct` for a White-only bulb, `rgb` for an RGB bulb, or `rgb_cct` for an RGBW bulb)
-	iv. your light Group ID (or `0` for the 'All' group / `0` for an RGB bulb)
+    1. the IP address of the hub
+    2. your hex Hub address (see the hub documentation for how to discover/set this)
+    3. your light type (`cct` for a White-only bulb, `rgb` for an RGB bulb, or `rgb_cct` for an RGBW bulb)
+    4. your light Group ID (or `0` for the 'All' group / `0` for an RGB bulb)
