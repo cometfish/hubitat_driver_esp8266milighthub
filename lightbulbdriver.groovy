@@ -5,7 +5,7 @@
  * 
  */
 metadata {
-    definition(name: "MiLight-LimitlessLED Light Color Test", namespace: "community", author: "cometfish/bw") {
+    definition(name: "MiLight-LimitlessLED Light", namespace: "community", author: "cometfish/bw") {
         capability "Actuator"
 		capability "Bulb"
         capability "Switch"
