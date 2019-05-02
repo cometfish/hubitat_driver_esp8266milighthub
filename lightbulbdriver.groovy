@@ -10,12 +10,14 @@ metadata {
 		capability "Bulb"
         capability "Switch"
 		capability "SwitchLevel"
-        capability "Light"		
+        capability "Light"
+		capability "ColorControl"
+		
 		attribute "nightMode", "boolean"
 		attribute "level", "number"
 		attribute "colorTemperature", "number" 
+		
 		command "nightMode"
-        capability "Color Control"
 		command "setColorTemperature", [[name: "ColorTemperature *", type: "NUMBER", description: "3000 for Warm white, up to 6500 for Cool white", constraints:[]]]
     }
 }
