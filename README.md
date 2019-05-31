@@ -10,7 +10,7 @@ Add MiLight/LimitlessLED bulbs to Hubitat (requires the [ESP8266 MiLight Hub](ht
     3. your light type (`cct` for a White-only bulb, `rgb` for an RGB bulb, or `rgb_cct` for an RGBW bulb)
     4. your light Group ID (or `0` for the 'All' group / `0` for an RGB bulb)
 
-You can also monitor the status of the MiLight hub if your hub is version 1.9.0 or higher and you have an MQTT broker (online/offline):
+You can also monitor the status of the MiLight hub (online/offline) if your hub is version 1.9.0 or higher and you have an MQTT broker:
 1. Configure your ESP8266 MiLight Hub for MQTT:
     1. Enter your MQTT broker address under `MQTT server`
     2. Enter your desired topic under `MQTT Client Status Topic`, eg. `milight/status`
