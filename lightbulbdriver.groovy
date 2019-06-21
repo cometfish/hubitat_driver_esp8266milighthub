@@ -1,11 +1,11 @@
 /*
  * ESP8266_MiLight_Hub driver
  *
- * Controls MiLight/LimitlessLED bulbs via the ESP8266 MiLight Hub by sidoh (https://github.com/sidoh/esp8266_milight_hub)
+ * Controls MiLight bulbs via the ESP8266 MiLight Hub by sidoh (https://github.com/sidoh/esp8266_milight_hub)
  * 
  */
 metadata {
-    definition(name: "MiLight-LimitlessLED Light", namespace: "community", author: "cometfish/bw") {
+    definition(name: "MiLight Light", namespace: "community", author: "cometfish", importUrl: "https://raw.githubusercontent.com/cometfish/hubitat_driver_esp8266milighthub/master/lightbulbdriver.groovy") {
         capability "Actuator"
 		capability "Bulb"
         capability "Switch"
@@ -18,7 +18,7 @@ metadata {
 		attribute "colorTemperature", "number" 
 		
 		command "nightMode"
-		command "setColorTemperature", [[name: "ColorTemperature *", type: "NUMBER", description: "3000 for Warm white, up to 6500 for Cool white", constraints:[]]]
+		command "setColorTemperature", [[name: "ColorTemperature *", type: "number", description: "3000 for Warm white, up to 6500 for Cool white", constraints:[]]]
     }
 }
 
@@ -32,14 +32,12 @@ preferences {
     }
 }
 
-def hsvToRGB(float conversionHue = 0, float conversionSaturation = 100, float conversionValue = 100, resolution = "low"){
-    // Accepts conversionHue (0-100 or 0-360), conversionSaturation (0-100), and converstionValue (0-100), resolution ("low", "high")
-    // If resolution is low, conversionHue accepts 0-100. If resolution is high, conversionHue accepts 0-360
+def hsvToRGB(float conversionHue = 0, float conversionSaturation = 100, float conversionValue = 100){
+    // Accepts conversionHue (0-100), conversionSaturation (0-100), and conversionValue (0-100)
     // Returns RGB map ([ red: 0-255, green: 0-255, blue: 0-255 ])
     
     // Check HSV limits
-    resolution == "low" ? ( hueMax = 100 ) : ( hueMax = 360 ) 
-    conversionHue > hueMax ? ( conversionHue = 1 ) : ( conversionHue < 0 ? ( conversionHue = 0 ) : ( conversionHue /= hueMax ) )
+    conversionHue > hueMax ? ( conversionHue = 1 ) : ( conversionHue < 0 ? ( conversionHue = 0 ) : ( conversionHue /= 100 ) )
     conversionSaturation > 100 ? ( conversionSaturation = 1 ) : ( conversionSaturation < 0 ? ( conversionSaturation = 0 ) : ( conversionSaturation /= 100 ) )
     conversionValue > 100 ? ( conversionValue = 1 ) : ( conversionValue < 0 ? ( conversionValue = 0 ) : ( conversionValue /= 100 ) ) 
         
@@ -67,44 +65,19 @@ def hsvToRGB(float conversionHue = 0, float conversionSaturation = 100, float co
 }
 
 def setColor(value){
-    if (value.hue == null || value.saturation == null) return
+    if (value.hue == null || value.saturation == null)
+        return
 
-    log.warn "setColor .."
-    //log.debug "${value.hue}"
-    //log.debug "${value.saturation}"
-
-
-    def rate = transitionTime?.toInteger() ?: 1000
-    def isOn = device.currentValue("switch") == "on"
-
-    def hexSat = zigbee.convertToHexString(Math.round(value.saturation.toInteger() * 254 / 100).toInteger(),2)
-    def level
-    if (value.level) level = (value.level.toInteger() * 2.55).toInteger()
-    def cmd = []
-    def hexHue
-
-    //hue is 0..360, value is 0..254 Hue = CurrentHue x 360 / 254
-    if (hiRezHue){
-        hexHue = zigbee.convertToHexString(Math.round(value.hue / 360 * 254).toInteger(),2)
-    } else {
-        hexHue = zigbee.convertToHexString(Math.round(value.hue * 254 / 100).toInteger(),2)
-    }
-    def hexHueTypeA
-	hexHueTypeA = zigbee.convertToHexString(Math.round(value.hue / 360 * 254).toInteger(),2)
-    def hexHueTypeB
-	hexHueTypeB = zigbee.convertToHexString(Math.round(value.hue * 254 / 100).toInteger(),2)
-
-    def hexHueTypeC
-	hexHueTypeC = Math.round(value.hue / 360 * 254).toInteger()
-	   
-	rgbColors = hsvToRGB( value.hue, value.saturation, value.level )
+    if (logEnable)
+        log.warn "setColor"
+    
+	rgbColors = hsvToRGB(value.hue, value.saturation, value.level)
 	
-    log.debug "hsvToRGB ${rgbColors}"
-    log.debug "value.saturation ${value.saturation}"
-    log.debug "hexSat ${hexSat}"
+    if (logEnable)
+        log.debug "hsvToRGB ${rgbColors}"
 
     try {
-		def url = "http://" + settings.ipAddress + "/gateways/" + settings.hubID + "/"+settings.lightType+"/" + settings.lightID
+		def url = "http://" + settings.ipAddress + "/gateways/" + settings.hubID + "/" + settings.lightType + "/" + settings.lightID
 		if (logEnable) log.debug url
         def postParams = [
             uri: url,
@@ -113,31 +86,27 @@ def setColor(value){
 			body : ["status": "on","color":["r":rgbColors['red'],"g":rgbColors['green'],"b":rgbColors['blue']]]
         ]
 
-		log.debug "postParams ${postParams}"
+        if (logEnable)
+		    log.debug "postParams ${postParams}"
     
         httpPost(postParams) { resp ->
 		    if (resp.success) {
-                sendEvent(name: "switch", value: "on", isStateChange: true)
-				sendEvent(name: "nightMode", value: "off", isStateChange: true)
+                sendEvent(name: "hue", value: value.hue, isStateChange: true)
+				sendEvent(name: "saturation", value: value.saturation, isStateChange: true)
+                if (value.level)
+                    sendEvent(name: "level", value: value.level, isStateChange: true)
             }
             if (logEnable)
                 if (resp.data) log.debug "${resp.data}"
         }
     } catch (Exception e) {
-        log.warn "Call to on failed: ${e.message}"
-    }    
-    
-}
-
-def logsOff() {
-    log.warn "debug logging disabled..."
-    device.updateSetting("logEnable", [value: "false", type: "bool"])
+        log.warn "Call to setColor failed: ${e.message}"
+    }  
 }
 
 def updated() {
     log.info "updated..."
     log.warn "debug logging is: ${logEnable == true}"
-    if (logEnable) runIn(1800, logsOff)
 }
 
 def parse(String description) {

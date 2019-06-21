@@ -6,7 +6,7 @@
  * 
  */
 metadata {
-    definition (name: "MiLight-LimitlessLED Gateway", namespace: "community", author: "cometfish") {
+    definition (name: "MiLight Gateway", namespace: "community", author: "cometfish", importUrl: "https://raw.githubusercontent.com/cometfish/hubitat_driver_esp8266milighthub/master/hubdriver.groovy") {
         capability "PresenceSensor"
 		
 		attribute "presence", "enum", ["present", "not present"]
