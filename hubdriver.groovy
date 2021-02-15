@@ -39,9 +39,9 @@ def parse(String description) {
 	json = new groovy.json.JsonSlurper().parseText(mqtt.payload)
 	if (logEnable) log.debug json
 	
-	if (json.status == 'connected') 
+	if (json.status == 'connected' && device.currentState("presence").value!="present") 
 	    sendEvent(name: "presence", value: "present", isStateChange: true)
-	else if (json.status.contains('disconnected'))
+	else if (json.status.contains('disconnected') && device.currentState("presence").value!="not present")
 		sendEvent(name: "presence", value: "not present", isStateChange: true)
 	state.version = json.version
 	state.ipAddress = json.ip_address
