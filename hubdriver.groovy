@@ -25,11 +25,6 @@ preferences {
     }
 }
 
-import static hubitat.helper.InterfaceUtils.alphaV1mqttConnect
-import static hubitat.helper.InterfaceUtils.alphaV1mqttDisconnect
-import static hubitat.helper.InterfaceUtils.alphaV1mqttSubscribe
-import static hubitat.helper.InterfaceUtils.alphaV1parseMqttMessage
-
 def installed() {
     log.warn "installed..."
 }
