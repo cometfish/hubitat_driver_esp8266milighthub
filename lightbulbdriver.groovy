@@ -13,7 +13,7 @@ metadata {
         capability "Light"
 		capability "ColorControl"
 		
-		attribute "nightMode", "boolean"
+		attribute "nightMode", "enum", ["on", "off"]
 		attribute "level", "number"
 		attribute "colorTemperature", "number" 
 		
