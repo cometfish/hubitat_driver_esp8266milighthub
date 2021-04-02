@@ -18,8 +18,8 @@ metadata {
 
 preferences {
     section("URIs") {
-        input "mqttBroker", "string", title: "MQTT Broker Address", required: true
-		input "mqttTopic", "string", title: "MQTT Topic", required: true
+        input "mqttBroker", "text", title: "MQTT Broker Address", required: true
+		input "mqttTopic", "text", title: "MQTT Topic", required: true
         input name: "mqttClientID", type: "text", title: "MQTT Client ID", required: true, defaultValue: "hubitat_milight" 
         input name: "logEnable", type: "bool", title: "Enable debug logging", defaultValue: true
     }
